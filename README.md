@@ -5,7 +5,7 @@ VoiceAgent is a fully local and offline assistant that:
 - transcribes speech using whisper
 - generates responses via local LLM (GGUF, llama.cpp)
 - speaks responses using system tts (pyttsx3)
-- automatically saves notes
+- automatically saves notes (WiP)
 
 ## Features
 - PL speech recognition (Whisper)
