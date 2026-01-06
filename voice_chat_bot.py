@@ -7,7 +7,8 @@ from llama_cpp import Llama
 import multiprocessing as mp
 
 
-MODEL_PATH = "bielik/bielik-7b-instruct-v0.1.Q4_K_M.gguf"
+MODEL_NAME = ""
+MODEL_PATH = f"llm_model/{MODEL_NAME}"
 WORKSPACE_DIR = "assistant_workspace"
 os.makedirs(WORKSPACE_DIR, exist_ok=True)
 
