@@ -4,6 +4,8 @@ import speech_recognition as sr
 import pyttsx3
 from faster_whisper import WhisperModel
 from llama_cpp import Llama
+import multiprocessing as mp
+
 
 MODEL_PATH = "bielik/bielik-7b-instruct-v0.1.Q4_K_M.gguf"
 WORKSPACE_DIR = "assistant_workspace"
@@ -34,16 +36,23 @@ class VoiceAgent:
             "[[NOTE: treść notatki]]. Nie pytaj czy zapisać, po prostu użyj komendy."
         )
 
-        self.engine = pyttsx3.init()
-        self._setup_voice()
 
-    def _setup_voice(self):
-        voices = self.engine.getProperty('voices')
-        for v in voices:
-            if "pl" in v.languages or "PL" in v.id or "Adam" in v.name:
-                self.engine.setProperty('voice', v.id)
-                break
-        self.engine.setProperty('rate', 160)
+        self.voice_id = self._find_polish_voice_id()
+
+    def _find_polish_voice_id(self):
+        try:
+            temp_engine = pyttsx3.init()
+            voices = temp_engine.getProperty('voices')
+            found_id = None
+            for voice in voices:
+                if "pl" in voice.language or "Paulina" in voice.language:
+                    found_id = voice.id
+                    break
+            del temp_engine
+            return found_id
+        except Exception as e:
+            print(f"błąd konfiguracji głosu: {e}")
+
 
     def speak(self, text):
         if not text: return
@@ -52,13 +61,20 @@ class VoiceAgent:
         if not clean_text: return
 
         print(f"Asystent: {clean_text}")
+
+        engine = None
         try:
-            self.engine.say(clean_text)
-            self.engine.runAndWait()
+            engine = pyttsx3.init()
+
+            if self.voice_id:
+                engine.setProperty('voice', self.voice_id)
+            engine.setProperty('rate', 160)
+
+            engine.say(text)
+            engine.runAndWait()
+
         except Exception as e:
-            print(f"Błąd TTS: {e}")
-            if self.engine._inLoop:
-                self.engine.endLoop()
+            print(f"Błąd mowy: {e}")
 
     def listen(self):
         r = sr.Recognizer()
